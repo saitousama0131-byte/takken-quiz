@@ -1,0 +1,224 @@
+<!doctype html><html lang="ja"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>宅建暗記クイズ v6</title><style>
+:root{--red:#8f211d;--bg:#fff8f6;--line:#ebd1cd;--ink:#222}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif}
+header{position:sticky;top:0;z-index:20;background:var(--red);color:#fff;box-shadow:0 2px 8px #0002}
+.topbar{height:48px;display:flex;align-items:center;gap:8px;padding:0 10px}
+.current{font-size:15px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1}
+.mini-score{font-size:12px;font-weight:800;opacity:.95;white-space:nowrap}
+.menu-btn{border:1px solid #ffffff55;background:#ffffff18;color:#fff;border-radius:9px;padding:6px 9px;font-size:13px;font-weight:800}
+.panel{display:none;padding:8px 10px 10px;border-top:1px solid #ffffff22}
+.panel.open{display:block}
+.tabs,.levels,.filters,.tools,.actions{display:flex;gap:7px;align-items:center}
+.tabs,.levels,.filters{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.tabs::-webkit-scrollbar,.levels::-webkit-scrollbar,.filters::-webkit-scrollbar{display:none}
+.tab,.level,.filter{flex:0 0 auto;border:1px solid #fff7;background:#fff;color:#7f201d;border-radius:999px;padding:7px 10px;font-size:12px;font-weight:700}
+.tab.active,.level.active,.filter.active{background:#50110f;color:#fff;border-color:#50110f}
+.group-label{font-size:11px;opacity:.8;margin:7px 0 4px}
+.tools{flex-wrap:wrap;margin-top:8px}
+.tools button{border:1px solid #fff6;background:#fff;color:#7f201d;border-radius:9px;padding:7px 9px;font-size:12px;font-weight:700}
+main{padding:10px;max-width:900px;margin:auto}
+.card{background:#fff;border:1px solid var(--line);border-radius:14px;margin:0 0 9px;overflow:hidden}
+.card.ok{border:2px solid #69a975;background:#f4fbf5}
+.card.ng{border:2px solid #cf6159;background:#fff6f5}
+.card.ok .num{background:#4f925d}
+.card.ng .num{background:#bd4d46}
+.card.ok::after,.card.ng::after{display:block;font-size:12px;font-weight:800;padding:0 10px 9px 55px}
+.card.ok::after{content:'○ できた';color:#397247}
+.card.ng::after{content:'× 要復習';color:#a43f39}
+.row{display:grid;grid-template-columns:46px 1fr}
+.num{background:#9f302b;color:#fff;font-weight:800;display:flex;align-items:flex-start;justify-content:center;padding:11px 5px;font-size:14px}
+.text{padding:11px 12px;font-size:14px;line-height:1.7;white-space:pre-line}
+.cloze{display:inline-block;min-width:5em;color:transparent;background:#f1dcda;border-bottom:2px solid #a64c46;border-radius:3px}
+.cloze.show{color:#c3342f;background:#fff1ef;font-weight:700}
+.extra.hide{display:inline-block;color:transparent;background:#eee1df;border-bottom:2px solid #9b7975;border-radius:3px;min-width:6em}
+.adv{display:inline-block;width:94%;min-height:3em;background:#eee1df;color:transparent;border-radius:6px}
+.actions{padding:0 9px 10px 55px;flex-wrap:wrap}
+.actions button{border:1px solid var(--line);background:#fff;border-radius:9px;padding:7px 10px;font-size:12px}
+.answer{background:#fff0ee!important;color:#8b2824;font-weight:800}
+.mark{width:42px;height:36px;padding:0!important;font-size:19px!important;font-weight:800}
+.mark.sel.ok{background:#4f925d!important;color:#fff;border-color:#4f925d!important;box-shadow:0 0 0 2px #d8efdd}
+.mark.sel.ng{background:#bd4d46!important;color:#fff;border-color:#bd4d46!important;box-shadow:0 0 0 2px #f2d9d6}
+.empty{padding:30px 12px;text-align:center;color:#777}
+footer{padding:26px 12px 44px;text-align:center;color:#888;font-size:11px}
+@media(min-width:700px){
+  .topbar{height:54px}.current{font-size:17px}.panel{display:block!important}
+  .menu-btn{display:none}.text{font-size:16px}
+}
+</style></head>
+<body>
+<header>
+  <div class="topbar">
+    <div id="current" class="current"></div>
+    <div id="score" class="mini-score">○0 ×0 未0</div>
+    <button id="menuBtn" class="menu-btn">設定</button>
+  </div>
+  <div id="panel" class="panel">
+    <div class="group-label">分野</div><div id="tabs" class="tabs"></div>
+    <div class="group-label">難易度</div>
+    <div class="levels">
+      <button class="level active" data-level="1">初級</button>
+      <button class="level" data-level="2">中級</button>
+      <button class="level" data-level="3">上級</button>
+    </div>
+    <div class="group-label">表示</div>
+    <div class="filters">
+      <button class="filter active" data-filter="all">全部</button>
+      <button class="filter" data-filter="ng">×だけ</button>
+      <button class="filter" data-filter="un">未回答</button>
+    </div>
+    <div class="tools">
+      <button id="reset">この分野をリセット</button>
+      <button id="backup">バックアップ</button>
+      <button id="restoreBtn">復元</button>
+      <input id="restore" type="file" accept="application/json" hidden>
+    </div>
+  </div>
+</header>
+<main><div id="cards"></div></main>
+<footer>設定は右上から。○×記録はブラウザ内に保存されます。</footer>
+<script>
+const DATA=[{"id": "35_sale", "title": "35条書面｜売買・交換", "items": [["1", "登記された権利の種類および内容\n・抵当権など登記されている権利関係を説明。説明時の登記内容を記載するので、物件を[[引渡すまでに抵当権が抹消される予定であっても]]その旨を記載する"], ["2", "[[法令に基づく制限]]\n・都市計画法、建築基準法等における造成や建築等の制限など、((具体的な制限の内容))"], ["3", "[[私道]]に関する負担に関する事項\n・[[将来の負担も含む]]私道負担の有無、私道面積、通行使用料等の負担額"], ["4", "[[飲用水、電気、ガス]]等の供給施設、[[排水施設]]の整備状況\n・未整備であればその[[整備の見通し]]や、その整備に当たって[[負担金が課されるか]]などの負担に関する事項"], ["5", "[[未完成物件]]の場合　工事完了時の形状、構造\n・[[宅地：造成工事完了時]]\n・完了時の形状、構造、宅地に接している道路の構造と幅員等\n・[[建物：建築工事完了時]]\n・完了時の形状、構造、主要構造部、内装および外装の構造や仕上げ等"], ["6", "[[土砂災害警戒区域内、造成宅地防災区域内、津波災害警戒区域内]]にある時はその旨"], ["7", "水防法の規定により市町村の長が提供する図面（[[水害ハザードマップ]]）に表示されているときは水害ハザードマップにおけるその宅地建物の[[所在地]]"], ["8", "[[住宅性能評価を受けた新築住宅]]の場合はその旨"], ["9", "[[石綿]]（アスベスト）の使用の有無の調査結果が記録されているときはその内容（[[実施は義務ではない]]）"], ["10", "昭和56年6月1日以降に新築工事に着手したものを除く建物が、指定確認検査機関等による一定の[[耐震診断]]を受けたものであるときはその内容（[[実施は義務ではない]]）"], ["11", "既存の建物であるときは、[[建物状況調査]]（インスペクション）等に関する事項\n・既存の建物であるときは、実施後1年を経過していない[[建物状況調査の実施の有無]]や、[[実施している場合はその結果の概要]]（[[実施は義務ではない]]）\n・[[鉄筋コンクリート造]]または[[鉄骨鉄筋コンクリート造]]の[[共同住宅等]]に係る重要事項説明の対象となる建物状況調査の結果については、調査の実施から[[2年]]を経過していないもの"], ["12", "既存の建物であるときは、[[建物の建築及び維持保全の状況に関する書類の保存状況]]\n・確認の申請書、確認済証、検査済証、建物状況調査の結果についての報告書、既存住宅にかかる建設住宅性能評価書等の保存の状況"], ["13", "代金、交換差金[[以外]]に授受される金銭の額、および目的\n・手付金等の[[額と目的]]\n※[[代金や交換差金は重要事項説明の対象外]]"], ["14", "契約の[[解除]]に関する事項\n・契約の解除が可能な場合、手続きや解除の効果について"], ["15", "[[損害賠償額の予定または違約金]]に関する事項\n・損害賠償額の予定、違約金としての違約金を定めるか否か"], ["16", "[[手付金等の保全措置]]の概要\n・[[宅建業者が自ら売主]]の場合、お客さんから受け取ったお金を返せるようにするための保全措置義務の概要"], ["17", "[[支払金、預り金]]を受領する場合の保全措置の有無、概要\n・宅建業者が取引の相手方などから、支払金、預り金を受領する場合、保全措置を講ずるか否か。保全措置を講ずる場合はその概要\n・[[50万円未満のもの]]、売主や交換の当事者である宅建業者が[[登記以後]]に受領するものについては、[[説明義務なし]]"], ["18", "ローンの[[あっせんの内容]]、およびローン[[不成立の場合の措置]]\n・住宅ローン等をあっせんする場合、融資額、金利、返済方法などのあっせんの内容や融資条件。ローンが受けられなかった場合の措置"], ["19", "[[契約不適合を担保すべき責任]]の履行に関し保証保険契約の締結、その他の措置の有無・概要\n・宅地建物が種類、品質に関して契約の内容に適合しない場合におけるその不適合を担保すべき責任の履行に関して、保証保険契約等を[[講ずるか否か・講ずる場合におけるその措置の概要]]"], ["20", "[[割賦販売]]の場合：現金販売価格、割賦販売価格、頭金・賦払いの額、支払時期・方法\n・分割払いを条件として販売する"]]}, {"id": "35_lease", "title": "35条書面｜貸借", "items": [["1", "[[登記]]された権利の種類および内容"], ["2", "[[法令に基づく制限]]\n・[[建物の貸借]]の場合、一定の制限のみ説明\n・[[建蔽率、容積率等]]に関する制限は関係ないので説明不要（[[宅地の貸借では説明必要]]）"], ["3", "[[私道]]負担に関する事項\n・建物を借りる人にとっては、私道については関係ない"], ["4", "[[飲用水、電気、ガス]]等の供給施設、[[排水施設]]の整備状況"], ["5", "[[未完成物件]]の工事完了時の形状、構造"], ["6", "[[土砂災害警戒区域、津波災害警戒区域、造成宅地防災区域]]に関する事項"], ["7", "[[水害ハザードマップ]]における取引対象物件の所在地"], ["8", "建物の[[石綿]]の使用の有無の調査結果の記録に関する事項"], ["9", "建物の[[耐震診断]]に関する事項"], ["10", "既存の建物であるときは、[[建物状況調査]]（インスペクション）等に関する事項\n［[[住宅性能評価]]［建物の建築及び維持保全の状況に関する書類］は記載事項ではない］"], ["11", "借賃[[以外]]に授受される金銭の額、および目的\n・敷金など"], ["12", "契約の[[解除]]に関する事項"], ["13", "[[損害賠償額]]の予定または違約金に関する事項"], ["14", "支払金、預り金を受領する場合の[[保全措置]]の有無、概要"], ["15", "[[台所・浴室・便所]]等の整備状況\n※[[事業用建物]]の貸借でも説明必要"], ["16", "[[契約期間および契約更新]]に関する事項\n・更新の際の更新料改定に関することや、期限付き建物賃貸借の場合は契約の更新はないこと等を説明"], ["17", "[[定期借地権、定期借家権（定期建物賃貸借）]]などに関する事項\n・期間が満了すれば契約は終了－更新はないことを説明"], ["18", "宅地建物の[[用途や利用の制限]]"], ["19", "金銭の[[契約終了時の精算]]に関する事項\n・敷金の用途等を明確にする。金額が明確でない場合はその旨を説明"], ["20", "宅地建物の[[管理の委託]]を受けた者の氏名や住所等"], ["21", "契約終了時における宅地の[[建物の取壊し]]に関する事項の内容\n・借地上の建物の取壊しのことなので、建物を借りる場合は該当しない"], ["22", "高齢者の居住の安定確保に関する法律に規定する[[終身建物賃貸借]]をしようとするときはその旨"]]}, {"id": "35_condo", "title": "35条書面｜区分所有建物", "items": [["賃貸1", "[[専有部分の用途、その他の利用の制限]]に関する規約の定めがあるときはその内容\n・専有部分の使い方に関する制限\n・ペット飼育や店舗営業などについて規約の定めがあるなら説明をする\n※[[規約が案の段階でも、その案についても説明が必要]]"], ["賃貸2", "一棟の建物および敷地の[[管理が委託]]されているときは、その委託先の氏名や住所等\n・マンション管理の適正化の推進に関する法律第44条の登録を受けているときは登録番号も記載\n・法人の場合、商号または名称、主たる事務所の所在地。ただし管理業務内容は不要"], ["売買1", "[[敷地]]に関する権利の種類及び内容\n・敷地利用権であれば、所有権か借地権かなど"], ["売買2", "[[共用部分]]に関する規約の定めがあるときはその内容\n※[[規約が案の段階でも、その案についても説明が必要]]"], ["売買3", "[[専有部分の用途、その他の利用の制限]]に関する規約の定めがあるときはその内容\n・専有部分の使い方に関する制限\n・ペット飼育や店舗営業などについて規約の定めがあるなら説明をする\n※[[規約が案の段階でも、その案についても説明が必要]]"], ["売買4", "[[専用使用権]]に関する規約の定めがあるときはその内容\n・専用駐車場や専用庭など。ただし、[[使用者の氏名や住所は説明不要]]\n※[[規約が案の段階でも、その案についても説明が必要]]"], ["売買5", "一棟の建物の計画的な[[維持修繕のための費用]]、通常の管理費用、その他の当該建物の所有者が負担しなければならない費用を、特定の者にのみ減免する旨の規約の定めがあるときはその内容\n※[[規約が案の段階でも、その案についても説明が必要]]"], ["売買6", "[[計画修繕積立金]]の規約の定めがあるときは、その内容及びすでに積み立てられている額\n・滞納がある場合は金額を告げなければならない\n※[[規約が案の段階でも、その案についても説明が必要]]"], ["売買7", "区分所有者が負担する通常の[[管理費用]]の額\n・通常の管理費・滞納がある場合は金額を告げなければならない"], ["売買8", "一棟の建物および敷地の[[管理が委託]]されているときは、その委託先の氏名や住所等\n・マンション管理の適正化の推進に関する法律第44条の登録を受けているときは登録番号も記載\n・法人の場合、商号または名称、主たる事務所の所在地。ただし管理業務内容は不要"], ["売買9", "一棟の建物の維持修繕の[[実施状況]]が記録されているときはその内容"]]}, {"id": "37", "title": "37条書面｜記載事項", "items": [["必須1", "当事者の[[氏名]]（法人の場合は名称）・[[住所]]"], ["必須2", "宅地・建物を[[特定]]するために必要な表示（所在地、地番、種類、構造、設計図など）"], ["必須3", "[[代金、交換差金、借賃の額（消費税額も明記する）]]・支払時期・支払方法"], ["必須4", "宅地・建物の[[引渡しの時期]]"], ["必須5", "[[移転登記申請の時期]]"], ["必須6", "既存の建物であるときは、建物の構造耐力上主要な部分等の状況について[[当事者の双方が確認した事項]]"], ["任意1", "代金、交換差金、借賃[[以外]]の金銭の授受に関する定めがあるときは、その額、目的\n[[授受の時期]]（35条書面では授受の時期は記載不要）"], ["任意2", "契約の[[解除]]に関する定めがあるときはその内容"], ["任意3", "[[損害賠償額]]の予定または違約金に関する定めがあるときはその内容"], ["任意4", "天災その他不可抗力による損害の負担（[[危険負担]]）に関する定めがあるときはその内容"], ["任意5", "代金または交換差金についての[[ローンのあっせん]]の定めがあるときは、[[ローンが成立しないときの措置]]"], ["任意6", "[[契約不適合を担保すべき責任の内容]]"], ["任意7", "[[契約不適合責任の履行]]に関して講ずべき保証保険契約の締結、その他の措置について定めがあるときはその内容"], ["任意8", "宅地・建物に係る[[租税、その他の公課の負担]]に関する定めがあるときはその内容"]]}, {"id": "mediation_doc", "title": "媒介契約書｜記載事項", "items": [["1", "物件を特定するために必要な事項（所在地・地番・種類・構造等）"], ["2", "宅地・建物の売買すべき[[価額]]、または評価額　※[[根拠が必要]]"], ["3", "媒介契約の種類：専属専任・専任・一般（明示型か非明示型）"], ["4", "媒介契約の[[有効期間]]および解除に関する事項"], ["5", "指定流通機構への登録に関する事項　※[[一般媒介でも登録の有無を記載する]]"], ["6", "報酬に関する事項"], ["7", "[[違反に対する措置]]　※専属専任や専任の場合、依頼者がほかの業者と契約した場合"], ["8", "国土交通大臣の定めた[[標準媒介契約約款]]に基づくものであるか否かの区別"], ["9", "[[既存]]の建物であるときは、依頼者に対する[[建物状況調査]]を実施する者のあっせんの有無\n※あっせん「無」とする場合は、その理由を記載"]]}, {"id": "mediation_types", "title": "媒介契約｜専属専任・専任・一般", "items": [["有効期間・更新", "専属専任・専任：[[3か月以内]]（超える場合は3か月となる）\n[[依頼者の申出]]で更新できる（[[自動更新無効、更新後も3か月以内]]）\n一般媒介：規制なし"], ["依頼者への報告義務", "専属専任：[[1週間に1回以上]]の報告（口頭、電子メール可）\n専任：[[2週間に1回以上]]の報告（口頭、電子メール可）\n一般媒介：規制なし"], ["指定流通機構への登録義務", "専属専任：指定流通機構（レインズ）へ[[媒介契約日から5日以内]]に登録\n専任：指定流通機構（レインズ）へ[[媒介契約日から7日以内]]に登録\n※[[休業日を除く]]、初日は算入しない\n一般媒介：規制なし"]]}, {"id": "reins", "title": "指定流通機構（REINS）｜登録事項", "items": [["1", "[[物件の所在]]"], ["2", "[[規模・形質]]"], ["3", "[[物件の取引の申込みの受付に関する状況]]"], ["4", "[[売買すべき価額や評価額]]"], ["5", "[[都市計画法その他の法令に基づく制限で主要なもの]]"], ["6", "[[専属専任媒介契約]]の場合はその旨"]]}];
+const KEY='takken_v4_progress';
+let sec=0,level=1,filter='all';
+let progress={};
+try{progress=JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){}
+
+const esc=s=>s.replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+const key=(sid,n)=>sid+'::'+n;
+const get=(sid,n)=>progress[key(sid,n)]||'';
+const save=()=>{localStorage.setItem(KEY,JSON.stringify(progress));updateScore()};
+
+function shortTitle(t){
+  return t.replace('35条書面｜','35条 ').replace('指定流通機構（REINS）｜','REINS ').replace('媒介契約｜','媒介 ');
+}
+function renderTabs(){
+  const t=document.getElementById('tabs');t.innerHTML='';
+  DATA.forEach((s,i)=>{
+    const b=document.createElement('button');
+    b.className='tab'+(i===sec?' active':'');
+    b.textContent=shortTitle(s.title);
+    b.onclick=()=>{
+      sec=i;renderTabs();render();
+      if(window.innerWidth<700) document.getElementById('panel').classList.remove('open');
+    };
+    t.appendChild(b);
+  });
+}
+
+document.querySelectorAll('.level').forEach(b=>b.onclick=()=>{
+  level=+b.dataset.level;
+  document.querySelectorAll('.level').forEach(x=>x.classList.toggle('active',x===b));
+  render();
+  if(window.innerWidth<700) document.getElementById('panel').classList.remove('open');
+});
+document.querySelectorAll('.filter').forEach(b=>b.onclick=()=>{
+  filter=b.dataset.filter;
+  document.querySelectorAll('.filter').forEach(x=>x.classList.toggle('active',x===b));
+  render();
+});
+
+function parsed(raw){
+  return esc(raw).replace(/\[\[(.*?)\]\]/gs,'<span class="cloze">$1</span>')
+                 .replace(/\(\((.*?)\)\)/gs,'<span class="extra">$1</span>');
+}
+function updateScore(){
+  const s=DATA[sec];let ok=0,ng=0,un=0;
+  s.items.forEach(([n])=>{const v=get(s.id,n);if(v==='ok')ok++;else if(v==='ng')ng++;else un++});
+  document.getElementById('score').textContent=`○${ok} ×${ng} 未${un}`;
+}
+function applyCardMark(card,sid,n){
+  const v=get(sid,n);
+  card.classList.remove('ok','ng');
+  if(v) card.classList.add(v);
+  const ok=card.querySelector('.mark.ok');
+  const ng=card.querySelector('.mark.ng');
+  if(ok) ok.classList.toggle('sel',v==='ok');
+  if(ng) ng.classList.toggle('sel',v==='ng');
+  if(filter==='ng') card.style.display=(v==='ng')?'':'none';
+  else if(filter==='un') card.style.display=v?'none':'';
+  else card.style.display='';
+}
+function setMark(card,sid,n,val){
+  const k=key(sid,n);
+  if(progress[k]===val) delete progress[k]; else progress[k]=val;
+  save();
+  applyCardMark(card,sid,n);
+}
+function render(){
+  const s=DATA[sec];
+  document.getElementById('current').textContent=shortTitle(s.title);
+  const root=document.getElementById('cards');root.innerHTML='';
+  let shown=0;
+  s.items.forEach(([n,raw])=>{
+    const v=get(s.id,n);
+    if(filter==='ng'&&v!=='ng')return;
+    if(filter==='un'&&v)return;
+    shown++;
+    const c=document.createElement('div');c.className='card '+(v||'');
+    const row=document.createElement('div');row.className='row';
+    const num=document.createElement('div');num.className='num';num.textContent=n;
+    const txt=document.createElement('div');txt.className='text';
+    if(level===3) txt.innerHTML='<span class="adv">この項目の内容を頭の中で再現</span>';
+    else{
+      txt.innerHTML=parsed(raw);
+      if(level===2) txt.querySelectorAll('.extra').forEach(x=>x.classList.add('hide'));
+    }
+    row.append(num,txt);
+
+    const ac=document.createElement('div');ac.className='actions';
+    const ans=document.createElement('button');ans.className='answer';ans.textContent='答えを表示';
+    let answerShown=false;
+    function hideAnswer(){
+      if(level===3){
+        txt.innerHTML='<span class="adv">この項目の内容を頭の中で再現</span>';
+      }else{
+        txt.innerHTML=parsed(raw);
+        if(level===2) txt.querySelectorAll('.extra').forEach(x=>x.classList.add('hide'));
+      }
+      answerShown=false;
+      ans.textContent='答えを表示';
+    }
+    function showAnswer(){
+      if(level===3){
+        txt.innerHTML=parsed(raw);
+        txt.querySelectorAll('.cloze').forEach(x=>x.classList.add('show'));
+      }else{
+        txt.querySelectorAll('.cloze').forEach(x=>x.classList.add('show'));
+        txt.querySelectorAll('.extra').forEach(x=>x.classList.remove('hide'));
+      }
+      answerShown=true;
+      ans.textContent='答えを隠す';
+    }
+    ans.onclick=()=>{answerShown ? hideAnswer() : showAnswer()};
+    const ok=document.createElement('button');ok.className='mark ok'+(v==='ok'?' sel':'');ok.textContent='○';ok.onclick=()=>setMark(c,s.id,n,'ok');
+    const ng=document.createElement('button');ng.className='mark ng'+(v==='ng'?' sel':'');ng.textContent='×';ng.onclick=()=>setMark(c,s.id,n,'ng');
+    ac.append(ans,ok,ng);
+    c.append(row,ac);root.appendChild(c);
+    applyCardMark(c,s.id,n);
+  });
+  if(!shown){root.innerHTML='<div class="empty">該当する項目はありません。</div>'}
+  updateScore();
+}
+
+document.getElementById('menuBtn').onclick=()=>document.getElementById('panel').classList.toggle('open');
+
+document.getElementById('reset').onclick=()=>{
+  const s=DATA[sec];
+  if(!confirm('この分野の○×記録を消しますか？'))return;
+  s.items.forEach(([n])=>delete progress[key(s.id,n)]);
+  save();render();
+};
+document.getElementById('backup').onclick=()=>{
+  const blob=new Blob([JSON.stringify(progress)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='takken_progress.json';a.click();
+};
+document.getElementById('restoreBtn').onclick=()=>document.getElementById('restore').click();
+document.getElementById('restore').onchange=async e=>{
+  const f=e.target.files[0];if(!f)return;
+  try{progress=JSON.parse(await f.text());save();render();alert('復元しました')}catch(err){alert('読み込めませんでした')}
+};
+renderTabs();render();
+</script></body></html>
