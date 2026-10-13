@@ -77,6 +77,9 @@ footer{padding:26px 12px 44px;text-align:center;color:#888;font-size:11px}
 @media(max-width:699px){.prediction-nav{top:48px}.prediction-stem{font-size:15px}.prediction-question h2{font-size:16px}.pred-actions{padding-left:55px}.pred-answer-panel,.pred-explanation,.pred-pending{margin-left:55px}}
 
 .prediction-option .cloze{cursor:pointer;touch-action:manipulation;}
+.review-nav{top:var(--review-header-height,48px);}
+.review-question{scroll-margin-top:calc(var(--review-header-height,48px) + 60px);}
+.review-question .cloze{max-width:100%;overflow-wrap:anywhere;}
 .prediction-option .cloze:focus-visible{outline:2px solid #6f93e8;outline-offset:2px;}
 </style></head>
 <body>
@@ -222,11 +225,11 @@ function renderPrediction(s,root){
   const groups=new Map();
   visible.forEach(item=>{const meta=item[2];if(!groups.has(meta.qnum))groups.set(meta.qnum,[]);groups.get(meta.qnum).push(item);});
   if(!visible.length){root.innerHTML='<div class="empty">該当する項目はありません。</div>';updateScore();return;}
-  const nav=document.createElement('nav');nav.className='prediction-nav';nav.setAttribute('aria-label',s.title+'へ移動');
+  const nav=document.createElement('nav');nav.className='prediction-nav'+(isReview?' review-nav':'');if(isReview)root.style.setProperty('--review-header-height',(window.innerWidth<700?48:document.querySelector('header').offsetHeight)+'px');nav.setAttribute('aria-label',s.title+'へ移動');
   [...groups.keys()].sort((a,b)=>a-b).forEach(n=>{const link=document.createElement('a');link.href='#'+anchor(n);link.textContent=isReview?prefix+n:isChapter7?'7-'+n:'問'+n;nav.appendChild(link);});
   root.appendChild(nav);
   [...groups.entries()].sort((a,b)=>a[0]-b[0]).forEach(([qnum,items])=>{
-    const first=items[0][2],section=document.createElement('section');section.className='prediction-question';section.id=anchor(qnum);
+    const first=items[0][2],section=document.createElement('section');section.className='prediction-question'+(isReview?' review-question':'');section.id=anchor(qnum);
     const h=document.createElement('h2');h.textContent=heading(qnum)+(first.title?'｜'+first.title:'');section.appendChild(h);
     if(first.stem){const stem=document.createElement('div');stem.className='prediction-stem';stem.textContent=first.stem;section.appendChild(stem);}
     items.forEach(([n,statement,meta])=>{
