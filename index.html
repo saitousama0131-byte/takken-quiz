@@ -203,6 +203,14 @@ DATA.push(...chapter3ReviewSectionsStage9);
 
 // 第1章・単元1の不足項目（教材確認済み）
 DATA.push(...[{"id":"review_unit1","title":"1 宅地建物取引業","group":"第1章 宅建業法・復習問題","reviewUnit":1,"items":[["5-1","宅地建物取引業者は、販売予定の戸建住宅の展示会を実施する際、会場で売買契約の締結や売買契約の申込みの受付を行わない場合であっても、当該会場内の公衆の見やすい場所に国土交通省令で定める標識を掲示しなければならない。",{"qnum":5,"label":"1","title":"事務所等に設置するもの②","stem":"次の記述のうち、宅地建物取引業法の規定によれば、正しいものはどれか。","answer":"⭕正しい","explanation":"この場所は案内所に該当します。契約の申込みを受けない案内所でも、標識を掲示しなければいけません。","method":false}],["7-1","宅地建物取引業者A（甲県知事免許）が、新たに宅地建物取引業を営む支店を甲県内に設置した場合、Aはその日から30日以内にその旨を甲県知事に届け出なければならない。",{"qnum":7,"label":"1","title":"案内所等の標識と届出②","stem":"宅地建物取引業者が行う届出に関する次の記述のうち、宅地建物取引業法の規定によれば、誤っているものはどれか。","answer":"⭕正しい","explanation":"新たに支店を設置することは、事務所の名称及び所在地の変更に該当し、30日以内に甲県知事に変更の届出が必要です（35ページ）。","method":false}],["7-3","宅地建物取引業者D（丙県知事免許）が、本店における専任の宅地建物取引士Eの退職に伴い、新たに専任の宅地建物取引士Fを本店に置いた場合、Dはその日から30日以内にその旨を丙県知事に届け出なければならない。",{"qnum":7,"label":"3","title":"案内所等の標識と届出②","stem":"宅地建物取引業者が行う届出に関する次の記述のうち、宅地建物取引業法の規定によれば、誤っているものはどれか。","answer":"⭕正しい","explanation":"専任の宅建士が退職して新しい宅建士を設置した場合、変更の届出が必要です（35ページ）。","method":false}]]}]);
+DATA.push({"id":"urban_planning_trick","title":"都市計画法・用途地域と補助的地域地区／ひっかけ○×","group":"第3章 法令上の制限等｜都市計画法","standaloneQuiz":true,"items":[
+["cityplan_trick_1","特別用途地区は、用途地域が定められていない区域において、特別の目的を実現するために定められる。",{"qnum":1,"label":"○×","answer":"❌誤り","explanation":"特別用途地区は用途地域内に定め、用途地域の指定を補完する地区です。","pending":false}],
+["cityplan_trick_2","特定用途制限地域は、用途地域が定められていない土地の区域（市街化調整区域を除く）に定められる。",{"qnum":2,"label":"○×","answer":"⭕正しい","explanation":"用途地域が定められていない区域に定めますが、市街化調整区域は除かれます。","pending":false}],
+["cityplan_trick_3","市街化調整区域では、特定用途制限地域を定めることができる。",{"qnum":3,"label":"○×","answer":"❌誤り","explanation":"特定用途制限地域の指定対象から市街化調整区域は除かれます。","pending":false}],
+["cityplan_trick_4","高度地区では、建築物の高さの最高限度または最低限度を定める。",{"qnum":4,"label":"○×","answer":"⭕正しい","explanation":"高度地区では建築物の高さの最高限度または最低限度を定めます。ただし、準都市計画区域内では最高限度に限られます。","pending":false}],
+["cityplan_trick_5","高度利用地区では、建築物の高さの最高限度と最低限度を定め、土地の高度利用を図る。",{"qnum":5,"label":"○×","answer":"❌誤り","explanation":"高さの最高限度・最低限度は高度地区の規定です。高度利用地区では容積率の最高・最低限度などを定めます。","pending":false}],
+["cityplan_trick_6","高度利用地区では、容積率の最高限度と最低限度、建蔽率の最高限度などを定める。",{"qnum":6,"label":"○×","answer":"⭕正しい","explanation":"高度利用地区では、容積率の最高・最低限度、建蔽率の最高限度、建築面積の最低限度などを定めます。","pending":false}]
+]});
 const chapter1ReviewSections=DATA.filter(s=>s.reviewUnit&&!s.reviewChapter);
 chapter1ReviewSections.forEach(s=>s.group='第1章 宅建業法｜復習問題');
 const chapter2ReviewSections=DATA.filter(s=>s.reviewChapter===2);
@@ -310,13 +318,13 @@ function setMark(card,sid,n,val){
   applyCardMark(card,sid,n);
 }
 
-function isChoiceQuiz(s){return s.id==='prediction'||s.id==='chapter7_review'||Boolean(s.reviewUnit);}
+function isChoiceQuiz(s){return s.id==='prediction'||s.id==='chapter7_review'||Boolean(s.reviewUnit)||Boolean(s.standaloneQuiz);}
 function plainReviewExplanation(raw){return raw.replace(/\[\[([\s\S]*?)\]\]/g,'$1');}
 function renderPrediction(s,root){
-  const isChapter7=s.id==='chapter7_review',isReview=Boolean(s.reviewUnit);
+  const isChapter7=s.id==='chapter7_review',isReview=Boolean(s.reviewUnit),isCityPlan=s.id==='urban_planning_trick';
   const prefix=s.reviewUnit+'-';
-  const heading=n=>isReview?prefix+n:isChapter7?'7-'+n:'予想問題'+n;
-  const anchor=n=>isReview?s.id+'-q'+n:isChapter7?'chapter7-q'+n:'pred-q'+n;
+  const heading=n=>isReview?prefix+n:isChapter7?'7-'+n:isCityPlan?'No.'+n:'予想問題'+n;
+  const anchor=n=>isReview?s.id+'-q'+n:isChapter7?'chapter7-q'+n:isCityPlan?s.id+'-q'+n:'pred-q'+n;
   const visible=s.items.filter(([n,q,meta])=>{
     if(meta.pending)return filter==='all';
     const v=get(s.id,n);
@@ -328,7 +336,7 @@ function renderPrediction(s,root){
   visible.forEach(item=>{const meta=item[2];if(!groups.has(meta.qnum))groups.set(meta.qnum,[]);groups.get(meta.qnum).push(item);});
   if(!visible.length){root.innerHTML='<div class="empty">該当する項目はありません。</div>';updateScore();return;}
   const nav=document.createElement('nav');nav.className='prediction-nav'+(isReview?' review-nav':'');if(isReview)root.style.setProperty('--review-header-height',(window.innerWidth<700?48:document.querySelector('header').offsetHeight)+'px');nav.setAttribute('aria-label',s.title+'へ移動');
-  [...groups.keys()].sort((a,b)=>a-b).forEach(n=>{const link=document.createElement('a');link.href='#'+anchor(n);link.textContent=isReview?prefix+n:isChapter7?'7-'+n:'問'+n;nav.appendChild(link);});
+  [...groups.keys()].sort((a,b)=>a-b).forEach(n=>{const link=document.createElement('a');link.href='#'+anchor(n);link.textContent=isReview?prefix+n:isChapter7?'7-'+n:isCityPlan?'No.'+n:'問'+n;nav.appendChild(link);});
   root.appendChild(nav);
   [...groups.entries()].sort((a,b)=>a[0]-b[0]).forEach(([qnum,items])=>{
     const first=items[0][2],section=document.createElement('section');section.className='prediction-question'+(isReview?' review-question':'');section.id=anchor(qnum);
@@ -339,7 +347,7 @@ function renderPrediction(s,root){
       const row=document.createElement('div');row.className='row';
       const num=document.createElement('div');num.className='num';num.textContent=meta.label;
       const text=document.createElement('div');text.className='text';
-      const label=document.createElement('div');label.className='pred-label';label.textContent=isReview?prefix+qnum+' '+meta.label:isChapter7?'7-'+qnum+' '+meta.label:'選択肢 '+meta.label;
+      const label=document.createElement('div');label.className='pred-label';label.textContent=isReview?prefix+qnum+' '+meta.label:isChapter7?'7-'+qnum+' '+meta.label:isCityPlan?'○×問題':'選択肢 '+meta.label;
       const question=document.createElement('div');if(isReview){question.innerHTML=parsed(statement);}else{question.textContent=statement;}text.append(label,question);row.append(num,text);card.appendChild(row);
       if(meta.pending){const pending=document.createElement('div');pending.className='pred-pending';pending.textContent='正答と解説に食い違いがあるため確認対象です。確認が済むまで答え・解説・自己採点は表示しません。';card.appendChild(pending);}
       else{
